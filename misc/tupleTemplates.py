@@ -1,23 +1,29 @@
 from typing import NamedTuple
 
 
-class autoStats(NamedTuple):
-    rank: str
-    value: int
 
-class teleOpStats(NamedTuple):
-    rank: str
-    value: int
+class quickStats(NamedTuple):
+    autoData: str
+    teleOpData: str
+    endGameData: str
+    NpData: str
 
-class totalNpStats(NamedTuple):
-    rank: str
-    value: int
+class locationValues(NamedTuple):
+    country: str
+    state: str
+    city: str
+    venue: str = None
 
-class autoStats(NamedTuple):
-    rank: str
-    value: int
-
-
-class endGameStats(NamedTuple):
+class eventData(NamedTuple):
     name: str
-    number: int
+    event_type: str
+    start: str
+
+    location: NamedTuple
+    stats: NamedTuple
+
+class eventStats(NamedTuple):
+    event_rank: int
+    w: int
+    l: int
+    t: int

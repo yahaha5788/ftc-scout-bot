@@ -3,6 +3,7 @@ from http.client import responses
 from types import SimpleNamespace
 import requests
 from typing import NamedTuple
+from misc.tupleTemplates import quickStats, locationValues, eventStats, eventData
 
 url = "https://api.ftcscout.org/graphql"
 
@@ -11,6 +12,22 @@ def getCodeDesc(code: int) -> str:
     desc: str = responses[code]
     return desc
 
+
+def appendSuffix(num: int) -> str:
+    num = str(num)
+    number = num
+    num = list("".join(num))[len(list("".join(num))) - 1] # muahahaha
+    match num:
+        case '1':
+            suf = 'st'
+        case '2':
+            suf = 'nd'
+        case '3':
+            suf = 'rd'
+        case _:
+            suf = 'th'
+    fin = f'{number}{suf}'
+    return fin
 
 def parseQuery(query):
     response = requests.post(url=url, json={"query": query})
@@ -26,8 +43,8 @@ def parseQuery(query):
 
 def getBestTeam():
     query = """
-    {
-    tepRecords(region: All, season: 2024, skip: 1, take: 1, sortDir: Desc, sortBy: "opr") {
+{
+    tepRecords(region: All, season: 2024, skip: 1, take: 1, sortDir: Desc, sortBy: "opr") { #gets the best team
         data {
             data {
                 team {
@@ -46,6 +63,14 @@ def getBestTeam():
                         TeleOp: dc {
                             rank: rank
                             opr: value
+                        }
+                        Endgame: eg {
+                            rank: rank
+                            opr: value
+                        }
+                        TotalNP: tot {
+                            rank: rank
+                            np: value
                         }
                     }
                     events(season: 2024) {
@@ -80,11 +105,16 @@ def getBestTeam():
     if not success:
         return data
     team = data.data.tepRecords.data[0].data.team #graphqk
-    qstats = team.qStats
+    autoData = team.qStats.Auto
+    teleOpData = team.qStats.TeleOp
+    endGameData = team.qStats.Endgame
+    npData = team.qStats.TotalNP
     events = team.events #this is a list, not namespace
     loc = team.location
-    print(team)
     number = team.number
     name = team.name
-
-getBestTeam()
+    auto = f"{round(autoData.opr)} | {appendSuffix(autoData.rank)}"
+    teleOp = f"{round(teleOpData.opr)} | {appendSuffix(teleOpData.rank)}"
+    endGame = f"{round(endGameData.opr)} | {appendSuffix(endGameData.rank)}"
+    npData = f"{round(npData.np)} | {appendSuffix(npData.rank)}"
+    qStats = quickStats(auto, teleOp, endGame, npData)
