@@ -1,5 +1,11 @@
+import queryUtils
+from misc.tupleTemplates import bestTeam
+
+
+def getBestTeam(region) -> bestTeam:
+    query = """
 {
-    tepRecords(region: All, season: 2024, skip: 1, take: 1, sortDir: Desc, sortBy: "opr") { #gets the best team
+    tepRecords(region: """+region+""", season: 2024, skip: 0, take: 1, sortDir: Desc, sortBy: "opr") {
         data {
             data {
                 team {
@@ -54,3 +60,25 @@
         }
     }
 }
+    """
+
+    success, data = queryUtils.parseQuery(query)
+    if not success:
+        return data
+
+    team = data.data.tepRecords.data[0].data.team #pov graphql
+    team_info = queryUtils.formatTeamInfo(team)
+
+    autoData = team.qStats.Auto
+    teleOpData = team.qStats.TeleOp
+    endGameData = team.qStats.Endgame
+    npData = team.qStats.TotalNP
+    qStats = queryUtils.formatQStats(autoData, teleOpData, endGameData, npData)
+
+    events = team.events #this is a list, not namespace
+    team_events = []
+
+    for event in events:
+        team_events.append(queryUtils.formatTeamEventData(event))
+
+    return bestTeam(team_info, qStats, team_events)

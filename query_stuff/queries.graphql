@@ -1,0 +1,56 @@
+{
+    tepRecords(region: All, season: 2024, skip: 0, take: 1, sortDir: Desc, sortBy: "opr") { #gets the best team
+        data {
+            data {
+                team {
+                    number: number
+                    name: name
+                    location {
+                        city
+                        state
+                        country
+                    }
+                    qStats: quickStats(season: 2024) {
+                        Auto: auto {
+                            rank: rank
+                            opr: value
+                        }
+                        TeleOp: dc {
+                            rank: rank
+                            opr: value
+                        }
+                        Endgame: eg {
+                            rank: rank
+                            opr: value
+                        }
+                        TotalNP: tot {
+                            rank: rank
+                            np: value
+                        }
+                    }
+                    events(season: 2024) {
+                        event {
+                            name
+                            type
+                            location {
+                                loc: venue
+                                city
+                                state
+                                country
+                            }
+                            start
+                        }
+                        stats {
+                            ... on TeamEventStats2024 {
+                                rank
+                                w: wins
+                                l: losses
+                                t: ties
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

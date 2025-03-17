@@ -9,21 +9,29 @@ class quickStats(NamedTuple):
     NpData: str
 
 class locationValues(NamedTuple):
-    country: str
-    state: str
-    city: str
+    cityStateCountry: str
     venue: str = None
-
-class eventData(NamedTuple):
-    name: str
-    event_type: str
-    start: str
-
-    location: NamedTuple
-    stats: NamedTuple
 
 class eventStats(NamedTuple):
     event_rank: int
     w: int
     l: int
     t: int
+
+class eventData(NamedTuple):
+    name: str
+    event_type: str
+    start: str
+
+    location: locationValues
+    stats: eventStats = None
+
+class teamInfo(NamedTuple):
+    name: str
+    number: int
+    loc: locationValues
+
+class bestTeam(NamedTuple):
+    info: teamInfo
+    stats: quickStats
+    events: list

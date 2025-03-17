@@ -8,7 +8,7 @@ config = dotenv_values("C:/Users/thomp/bots/keys.env")
 
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="$", intents=intents)
+bot = commands.Bot(command_prefix="polaroid ", intents=intents)
 
 def checkSupercolor(ctx, u):
     role = discord.utils.find(lambda r: r.name == f'sc.{u}', ctx.message.guild.roles)
@@ -25,9 +25,9 @@ async def on_ready():
 async def test(ctx):
     await ctx.send("Online")
 
-@bot.command(pass_context=True, aliases=['sc'], help="Command format: $supercolor <hexcode>", description="Uses user input of a 6-character hex code to create a role with that color and add it to the user. The color role includes the user's username to avoid name conflicts", brief="Changes nickname color using a hex code input")
-async def supercolor(ctx, hexcode):
-    if len(hexcode) != 6:
+@bot.command(pass_context=True, aliases=['sc'], help="Command format: polaroid supercolor <hexcode>", description="Uses user input of a 6-character hex code to create a role with that color and add it to the user. The color role includes the user's username to avoid name conflicts", brief="Changes nickname color using a hex code input")
+async def supercolor(ctx, hexcode=None):
+    if len(hexcode) != 6 or not hexcode:
         await ctx.send('Hex code must be 6 characters long, e.g. B900FF.')
         return
     else:
@@ -43,7 +43,7 @@ async def supercolor(ctx, hexcode):
         colorembed = discord.Embed(title='*Click!*', description=f"You have been given the color #{hex}.", color=hexcode)
         await ctx.send(embed=colorembed)
 
-@bot.command(pass_context=True, aliases=['cc'], help="Command format: $clearcolor", description="Clears a user's color role", brief="Clears a user's color role")
+@bot.command(pass_context=True, aliases=['cc'], help="Command format: polaroid clearcolor", description="Clears a user's color role", brief="Clears a user's color role")
 async def clearcolor(ctx):
     user = ctx.message.author
     usern = user.name
