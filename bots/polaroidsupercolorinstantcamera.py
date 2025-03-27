@@ -4,33 +4,31 @@ import discord.utils
 from dotenv import dotenv_values
 import re
 
-config = dotenv_values("C:/Users/thomp/bots/keys.env")
-
-
+command_prefix = "polaroid "
 #role syntax: sc.{usern}
 #example: sc.yahaha
 
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix="polaroid ", intents=intents)
+bot = commands.Bot(command_prefix=command_prefix, intents=intents)
         
-def currentRoleName(hexcode):
+def currentRoleName(hexcode: str) -> str:
     return f"sc.{hexcode}" #never underestimate my laziness      
         
-def isValidHex(hexcode):
-    checker = r'[0-9A-Fa-f]{6}'
-    try:
-        is_hex = re.fullmatch(checker, hexcode)
-        return True if is_hex else False
-    except TypeError:
+def isValidHex(hexcode) -> bool:
+    if not isinstance(hexcode, str):  
         return False
+    return bool(re.fullmatch(r"[0-9A-Fa-f]{6}", hexcode))
+
+def getName(user) -> str:
+    return user.nick if user.nick else user.display_name
 
 async def checkSupercolor(ctx):
-    for role in ctx.message.user.roles:
+    for role in ctx.message.author.roles:
         if role.name.startswith("sc."):
-            await ctx.message.user.remove_roles(role)
-            if len(role.members) = 0:
-                role.delete()
+            await ctx.message.author.remove_roles(role)
+            if len(role.members) == 0:
+                await role.delete()
 
 @bot.event
 async def on_ready():
@@ -53,9 +51,9 @@ async def supercolor(ctx, hexcode=None):
         if role is None:
             await ctx.guild.create_role(name=name, color=discord.Color(int(hexcode, 16)))
             role = discord.utils.get(ctx.guild.roles, name=name)
-                    
+            await role.edit(position=len(ctx.guild.roles))
         await user.add_roles(role)
-        await role.edit(position=len(ctx.guild.roles))
+
         colorembed = discord.Embed(title='*Click!*', description=f"You have been given the color #{hexcode}.", color=int(hexcode, 16))
         await ctx.send(embed=colorembed)
     else:
@@ -63,9 +61,14 @@ async def supercolor(ctx, hexcode=None):
         
 @bot.command(pass_context=True, aliases=['cc'], help="Command format: polaroid clearcolor", description="Clears a user's color role", brief="Clears a user's color role")
 async def clearcolor(ctx):
-    checkSupercolor(ctx)
+    await checkSupercolor(ctx)
     embed = discord.Embed(title='Success!', description='Your color role has been removed')
     await ctx.send(embed=embed)
     
-  
-bot.run(config["POLAROID_API_KEY"])
+@bot.command(pass_context=True)
+async def currentcolor(ctx):
+    user = ctx.message.author
+    for role in user.roles:
+        if role.name.startswith("sc."):
+            hexcode = f"{role.color.value:06X}"
+            await ctx.send(f"{getName(user)}'s current color is #{hexcode}.\nCommand: polaroid supercolor {hexcode}")
