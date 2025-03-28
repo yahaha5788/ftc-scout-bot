@@ -5,12 +5,11 @@ from dotenv import dotenv_values
 import re
 
 command_prefix = "polaroid "
-#role syntax: sc.{usern}
-#example: sc.yahaha
+activity = discord.Game(name="with colors")
 
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix=command_prefix, intents=intents)
+bot = commands.Bot(command_prefix=command_prefix, intents=intents, activity=activity)
         
 def currentRoleName(hexcode: str) -> str:
     return f"sc.{hexcode}" #never underestimate my laziness      
@@ -33,7 +32,6 @@ async def checkSupercolor(ctx):
 @bot.event
 async def on_ready():
     print("Online.")
-    await bot.change_presence(activity=discord.Game(name="with colors"))
 
 
 @bot.command(pass_context=True, brief="A test command to check if the bot is working")
