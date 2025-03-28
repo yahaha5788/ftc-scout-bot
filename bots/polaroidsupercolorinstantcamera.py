@@ -18,6 +18,7 @@ def currentRoleName(hexcode: str) -> str:
 def isValidHex(hexcode) -> bool:
     if not isinstance(hexcode, str):  
         return False
+        
     return bool(re.fullmatch(r"[0-9A-Fa-f]{6}", hexcode))
 
 def getName(user) -> str:
@@ -31,13 +32,16 @@ def findSupercolorRole(user):
     for role in user.roles:
         if role.name.startswith("sc."):
             return role
+            
     return None
             
 def filterUsers(users: list) -> list:
     filtered_users = []
+    
     for user in users:
         if findSupercolorRole(user):
             filtered_users.append(user)
+            
     return filtered_users
          
         
@@ -45,21 +49,25 @@ async def removeSupercolor(ctx):
     user = ctx.message.author
     role = findSupercolorRole(user)
     if role is None:
-        return
+        return False
         
     await user.remove_roles(role)
     
     if len(role.members) == 0:
         await role.delete()
+        
+    return True
                 
 async def addSupercolor(ctx, hexcode):
     name = currentRoleName(hexcode)
     user = ctx.message.author
         
     role = discord.utils.get(ctx.guild.roles, name=name)
+    
     if role is None:
         role = await ctx.guild.create_role(name=name, color=discord.Color(int(hexcode, 16)))
         await role.edit(position=len(ctx.guild.roles))
+        
     await user.add_roles(role)
 
 
@@ -93,7 +101,8 @@ class SelectUser(View):
         
     async def on_timeout(self):
         if not self.selected_user:
-            await self.ctx.send("Selection timed out.")
+            embed = discord.Embed(title="Timeout", description="Selection timed out")
+            await self.ctx.send(embed=embed)
             
             
 @bot.event
@@ -118,17 +127,27 @@ async def supercolor(ctx, hexcode=None):
         
 @bot.command(pass_context=True, aliases=['cc'], help="Command format: polaroid clearcolor", description="Clears a user's color role", brief="Clears a user's color role")
 async def clearcolor(ctx):
-    await removeSupercolor(ctx)
-    embed = discord.Embed(title='Success!', description='Your color role has been removed')
-    await ctx.send(embed=embed)
+    had_role = await removeSupercolor(ctx)
+    if had_role:
+        embed = discord.Embed(title='Click!*', description='Your color role has been removed')
+        await ctx.send(embed=embed)
+    else: 
+        ctx.send("You do not have a color role")
     
 @bot.command(pass_context=True)
 async def currentcolor(ctx):
     user = ctx.message.author
-    for role in user.roles:
-        if role.name.startswith("sc."):
-            hexcode = f"{role.color.value:06X}"
-            await ctx.send(f"{getName(user)}'s current color is #{hexcode}.\nCommand: polaroid supercolor {hexcode}")
+    role = findSupercolorRole(user)
+    
+    if not role:
+        ctx.send("You do not have a color role")
+        return
+        
+    hexcode = f"{role.color.value:06X}"
+    
+    embed = discord.Embed(description=f"{getName(user)}'s current color is #{hexcode}.")
+    embed.set_footer("Command: polaroid supercolor {hexcode}")
+    await ctx.send(embed=embed)
             
 @bot.command(pass_context=True)
 async def copycolor(ctx, username):
