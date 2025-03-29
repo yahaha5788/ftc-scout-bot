@@ -1,8 +1,8 @@
 import queryUtils
-from misc.tupleTemplates import bestTeam
+from misc.tupleTemplates import queryResult
 
 
-def getBestTeam(region) -> bestTeam:
+def getBestTeam(region) -> queryResult:
     query = """
 {
     tepRecords(region: """+region+""", season: 2024, skip: 0, take: 1, sortDir: Desc, sortBy: "opr") {
@@ -64,9 +64,9 @@ def getBestTeam(region) -> bestTeam:
 
     success, data = queryUtils.parseQuery(query)
     if not success:
-        return data
+        return queryResult(data, success)
 
-    team = data.data.tepRecords.data[0].data.team #pov graphql
+    team = data.data.tepRecords.data[0].data.team #what
     team_info = queryUtils.formatTeamInfo(team)
 
     autoData = team.qStats.Auto
@@ -80,5 +80,37 @@ def getBestTeam(region) -> bestTeam:
 
     for event in events:
         team_events.append(queryUtils.formatTeamEventData(event))
-
-    return bestTeam(team_info, qStats, team_events)
+        
+    bt = bestTeam(team_info, qStats, team_events)
+    
+    return queryResult(bt, success)
+    
+def teamQuickStats(number):
+    query = """
+{
+    teamByNumber(number: """+number+""") {
+        name
+        number
+        qStats: quickStats(season: 2024) {
+            Auto: auto {
+                rank: rank
+                opr: value
+            }
+            TeleOp: dc {
+                rank: rank
+                opr: value
+            }
+            Endgame: eg {
+                rank: rank
+                opr: value
+            }
+            TotalNP: tot {
+                rank: rank
+                np: value
+            }
+        }
+    }
+}     
+    """
+    
+    success, data = queryUtils.parseQuery(query)
