@@ -9,6 +9,7 @@ from dotenv import dotenv_values
 
 config = dotenv_values("C:/Users/thomp/bots/keys.env")
 
-polaroid.run(config["POLAROID_KEY"]
-#robobot.run(config["ROBOBOT_KEY"]
-#harold.run(config["HAROLD_KEY"]
+if __name__ == "__main__":
+    polaroid.run(config["POLAROID_KEY"]
+    #robobot.run(config["ROBOBOT_KEY"]
+    #harold.run(config["HAROLD_KEY"]
