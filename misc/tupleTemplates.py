@@ -35,3 +35,7 @@ class bestTeam(NamedTuple):
     info: teamInfo
     stats: quickStats
     events: list
+    
+class queryResult(NamedTuple):
+    result: NamedTuple
+    success: bool
